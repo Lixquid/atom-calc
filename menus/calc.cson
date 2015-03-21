@@ -1,0 +1,21 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+menu: [
+	label: "Packages"
+	submenu: [
+		label: "Calc"
+		submenu: [
+			{
+				label: "Eval"
+				command: "calc:eval"
+			}
+			{
+				label: "Replace"
+				command: "calc:replace"
+			}
+			{
+				label: "Count"
+				command: "calc:count"
+			}
+		]
+	]
+]

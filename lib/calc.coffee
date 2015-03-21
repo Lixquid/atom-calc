@@ -11,6 +11,10 @@ module.exports = Calc =
 			default: true
 			description: "Allows use of Math functions such as `pow` without
 				prepending Math."
+		countStartIndex:
+			type: "integer"
+			default: 0
+			description: "The starting number to count from when using `count`."
 
 	## Events ##################################################################
 
@@ -72,5 +76,5 @@ module.exports = Calc =
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 
-		i = 0
+		i = atom.config.get "calc.countStartIndex"
 		@iterateSelections( editor, (sel) => i++ )

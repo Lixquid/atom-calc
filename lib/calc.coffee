@@ -37,6 +37,14 @@ module.exports = Calc =
 
 		# Create Sandbox and populate with functions
 		@sandbox = vm.createContext()
+		vm.runInContext "Math.pwd = function( len ) {
+				out = \"\";
+				for ( var x = 0; x < len || 20; x++ )
+					out += String.fromCharCode(
+					  Math.floor( Math.random() * 95 + 32 ) );
+				return out;
+			};
+			Math.password = Math.pwd;", @sandbox
 
 	deactivate: ->
 		@events.dispose()
@@ -56,7 +64,7 @@ module.exports = Calc =
 		# withMath
 		str = "with (Math) {#{str}}" if atom.config.get "calc.withMath"
 
-		try @previous = vm.runInThisContext( str, @sandbox )
+		try @previous = vm.runInContext( str, @sandbox )
 
 	iterateSelections: (editor, fn) ->
 		@count = atom.config.get "calc.countStartIndex"

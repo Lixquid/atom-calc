@@ -9,7 +9,7 @@ module.exports = Calc =
 		withMath:
 			type: "boolean"
 			default: true
-			description: "Allows use of Math functions such as `pow` with
+			description: "Allows use of Math functions such as `pow` without
 				prepending Math."
 
 	## Events ##################################################################

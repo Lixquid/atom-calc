@@ -6,6 +6,11 @@ module.exports = Calc =
 	## Config ##################################################################
 
 	config:
+		extendedVariables:
+			type: "boolean"
+			default: true
+			description: "Enables the use of some \"magic\" variables, such as
+				i and _."
 		withMath:
 			type: "boolean"
 			default: true
@@ -40,11 +45,22 @@ module.exports = Calc =
 
 	## Util Functions ##########################################################
 
+	previous: null
+	count: null
+
 	calculateResult: (str) ->
+		# extendedVariables
+		if atom.config.get "calc.extendedVariables"
+			str = "i = #{@count++}; _ = #{@previous}; #{str}"
+
+		# withMath
 		str = "with (Math) {#{str}}" if atom.config.get "calc.withMath"
-		try vm.runInThisContext( str, @sandbox )
+
+		console.log str
+		try @previous = vm.runInThisContext( str, @sandbox )
 
 	iterateSelections: (editor, fn) ->
+		@count = atom.config.get "calc.countStartIndex"
 		for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
 			out = fn( sel )
 			sel.insertText( out.toString() ) if out?

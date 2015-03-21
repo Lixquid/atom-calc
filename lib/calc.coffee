@@ -56,7 +56,6 @@ module.exports = Calc =
 		# withMath
 		str = "with (Math) {#{str}}" if atom.config.get "calc.withMath"
 
-		console.log str
 		try @previous = vm.runInThisContext( str, @sandbox )
 
 	iterateSelections: (editor, fn) ->

@@ -22,6 +22,16 @@ Evaluates the expression selected and replaces it.
 
 For every selection, replace the text with the currently selected index.
 
+## Functions
+
+Some functions not normally available to Javascript are available inside
+expressions:
+
+### `Math.pwd`
+
+Generates a random password of a given length.
+If not given a length, defaults to 20.
+
 ## Extended Variables
 
 Extended Variables provide meaning to some "magic" variable names:

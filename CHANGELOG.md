@@ -1,2 +1,2 @@
 # 0.1.0
-- Added `eval`, `replace`, and `count`
+- Added `evaluate`, `replace`, and `count`

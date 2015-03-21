@@ -5,8 +5,8 @@ menu: [
 		label: "Calc"
 		submenu: [
 			{
-				label: "Eval"
-				command: "calc:eval"
+				label: "Evaluate"
+				command: "calc:evaluate"
 			}
 			{
 				label: "Replace"

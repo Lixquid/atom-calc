@@ -36,7 +36,7 @@ module.exports = Calc =
 		# Register Command event handlers
 		@events = new CompositeDisposable
 		@events.add( atom.commands.add( "atom-text-editor", {
-			"calc:eval": => @eval()
+			"calc:evaluate": => @evaluate()
 			"calc:replace": => @replace()
 			"calc:count": => @count()
 		} ) )
@@ -51,7 +51,7 @@ module.exports = Calc =
 
 	## Commands ################################################################
 
-	eval: ->
+	evaluate: ->
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 

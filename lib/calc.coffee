@@ -1,21 +1,6 @@
 {CompositeDisposable} = require "atom"
 vm = require "vm"
 
-
-
-## Util ########################################################################
-
-evaluate = (str) ->
-	str = "with (Math) {#{str}}" if atom.config.get "calc.withMath"
-	try vm.runInThisContext( str, @sandbox )
-
-iterateSelections = (editor, fn) ->
-	for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
-		out = fn( sel )
-		sel.insertText( out.toString() ) if out?
-
-
-
 module.exports = Calc =
 
 	## Config ##################################################################
@@ -49,14 +34,27 @@ module.exports = Calc =
 
 
 
+	## Util Functions ##########################################################
+
+	calculateResult: (str) ->
+		str = "with (Math) {#{str}}" if atom.config.get "calc.withMath"
+		try vm.runInThisContext( str, @sandbox )
+
+	iterateSelections: (editor, fn) ->
+		for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
+			out = fn( sel )
+			sel.insertText( out.toString() ) if out?
+
+
+
 	## Commands ################################################################
 
 	evaluate: ->
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 
-		iterateSelections( editor, (sel) ->
-			out = evaluate sel.getText()
+		@iterateSelections( editor, (sel) =>
+			out = @calculateResult sel.getText()
 			return unless out?
 
 			sel.getText() + " = " + out )
@@ -65,8 +63,8 @@ module.exports = Calc =
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 
-		iterateSelections( editor, (sel) ->
-			out = evaluate sel.getText()
+		@iterateSelections( editor, (sel) =>
+			out = @calculateResult sel.getText()
 
 			return out )
 
@@ -75,4 +73,4 @@ module.exports = Calc =
 		return unless editor?
 
 		i = 0
-		iterateSelections( editor, (sel) -> ++i )
+		@iterateSelections( editor, (sel) => i++ )

@@ -59,10 +59,15 @@ module.exports = Calc =
 	calculateResult: (str) ->
 		# extendedVariables
 		if atom.config.get "calc.extendedVariables"
-			str = "i = #{@count++}; _ = #{@previous}; #{str}"
+			str = "
+				_ = #{@previous};
+				_#{@count} = _;
+				i = #{@count++};
+				#{str}"
 
 		# withMath
-		str = "with (Math) {#{str}}" if atom.config.get "calc.withMath"
+		if atom.config.get "calc.withMath"
+			str = "with (Math) {#{str}}"
 
 		try @previous = vm.runInContext( str, @sandbox )
 

@@ -16,6 +16,11 @@ module.exports = Calc =
 			default: true
 			description: "Allows use of Math functions such as `pow` without
 				prepending Math."
+		evaluateAllOnEmptySelection:
+			type: "boolean"
+			default: true
+			description: "If this is enabled, calling a command with an empty
+				selection will run each line as an expression."
 		countStartIndex:
 			type: "integer"
 			default: 0
@@ -72,10 +77,25 @@ module.exports = Calc =
 		try @previous = vm.runInContext( str, @sandbox )
 
 	iterateSelections: (editor, fn) ->
+		# Reset Count
 		@count = atom.config.get "calc.countStartIndex"
+
+		# If selection's empty, select all and split
+		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and
+		  editor.getSelections().length == 1 and
+		  editor.getSelections()[0].getText() == ""
+
+			cur_pos = editor.getCursorScreenPosition()
+			editor.selectAll()
+			editor.splitSelectionsIntoLines()
+
+		# Iterate over selections, replace with result
 		for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
 			out = fn( sel )
 			sel.insertText( out.toString() ) if out?
+
+		if atom.config.get "calc.evaluateAllOnEmptySelection"
+			editor.setCursorScreenPosition cur_pos
 
 
 

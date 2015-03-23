@@ -36,8 +36,10 @@ If not given a length, defaults to 20.
 
 Extended Variables provide meaning to some "magic" variable names:
 
-`_` is replaced with the result of the last expression.
-`i` is replaced with the number of the current selection.
+- `_` is replaced with the result of the last expression.
+- `_n` (e.g. `_1`, `_2`, etc..) is replaced with the result of the `n`th
+  expression.
+- `i` is replaced with the number of the current selection.
 
 ## Notes
 

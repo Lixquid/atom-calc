@@ -94,7 +94,7 @@ module.exports = Calc =
 			out = fn( sel )
 			sel.insertText( out.toString() ) if out?
 
-		if atom.config.get "calc.evaluateAllOnEmptySelection"
+		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and cur_pos?
 			editor.setCursorScreenPosition cur_pos
 
 

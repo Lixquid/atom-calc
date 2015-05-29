@@ -90,9 +90,10 @@ module.exports = Calc =
 			editor.splitSelectionsIntoLines()
 
 		# Iterate over selections, replace with result
-		for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
-			out = fn( sel )
-			sel.insertText( out.toString() ) if out?
+		editor.getBuffer().transact ->
+			for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
+				out = fn( sel )
+				sel.insertText( out.toString() ) if out?
 
 		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and cur_pos?
 			editor.setCursorScreenPosition cur_pos

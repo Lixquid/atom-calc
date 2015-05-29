@@ -1,7 +1,7 @@
 {
   "name": "calc",
   "main": "./lib/calc",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": "Lixquid",
   "description": "Calculation short-cuts for Atom.",
   "repository": "https://github.com/Lixquid/atom-calc",

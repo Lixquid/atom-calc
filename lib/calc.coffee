@@ -35,9 +35,9 @@ module.exports = Calc =
 		# Register Command event handlers
 		@events = new CompositeDisposable
 		@events.add( atom.commands.add( "atom-text-editor", {
-			"calc:evaluate": => @evaluate()
-			"calc:replace": => @replace()
-			"calc:count": => @count()
+			"calc:evaluate": => @evaluateCommand()
+			"calc:replace": => @replaceCommand()
+			"calc:count": => @countCommand()
 		} ) )
 
 		# Create Sandbox and populate with functions
@@ -102,7 +102,7 @@ module.exports = Calc =
 
 	## Commands ################################################################
 
-	evaluate: ->
+	evaluateCommand: ->
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 
@@ -112,7 +112,7 @@ module.exports = Calc =
 
 			sel.getText() + " = " + out )
 
-	replace: ->
+	replaceCommand: ->
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 
@@ -121,7 +121,7 @@ module.exports = Calc =
 
 			return out )
 
-	count: ->
+	countCommand: ->
 		editor = atom.workspace.getActiveTextEditor()
 		return unless editor?
 

@@ -8,5 +8,9 @@
   "license": "GNU GPL v3",
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
+  },
+  "devDependencies": {
+    "fs-plus": "^2.8.1",
+    "temp": "^0.8.1"
   }
 }

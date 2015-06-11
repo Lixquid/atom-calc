@@ -1,3 +1,6 @@
+## 0.3.5
+- Added single-line comments to lines to ignore
+
 ## 0.3.4
 - Forced `calc:evaluate` and `calc:replace` to skip empty selections
 - Fixed name mismatch bug relating to `calc:count` command

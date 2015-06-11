@@ -110,7 +110,8 @@ module.exports = Calc =
 		editor.getBuffer().transact ->
 			for sel in editor.getSelections().sort( ( a, b ) -> a.compare( b ) )
 				# If we're ignoring empty selections, skip
-				if sel.isEmpty() and not include_empty
+				if not include_empty and
+				  ( sel.isEmpty() or /^\s*\/\//.test( sel.getText() ) )
 					continue
 
 				out = func( sel )

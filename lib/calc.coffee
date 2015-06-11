@@ -76,7 +76,7 @@ module.exports = Calc =
 
 		try @previous = vm.runInContext( str, @sandbox )
 
-	iterateSelections: (editor, fn) ->
+	iterateSelections: (editor, fn, ignore_empty) ->
 		# Reset Count
 		@count = atom.config.get "calc.countStartIndex"
 
@@ -92,6 +92,8 @@ module.exports = Calc =
 		# Iterate over selections, replace with result
 		editor.getBuffer().transact ->
 			for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
+				if sel.isEmpty() and not ignore_empty
+					continue
 				out = fn( sel )
 				sel.insertText( out.toString() ) if out?
 
@@ -126,4 +128,4 @@ module.exports = Calc =
 		return unless editor?
 
 		i = atom.config.get "calc.countStartIndex"
-		@iterateSelections( editor, (sel) => i++ )
+		@iterateSelections( editor, ( (sel) => i++ ), true )

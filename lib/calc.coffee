@@ -99,7 +99,7 @@ module.exports = Calc =
 		# select all and split into selections
 		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and
 		  editor.getSelections().length == 1 and
-		  editor.getSelections()[0].getText() == ""
+		  editor.getSelections()[0].isEmpty()
 
 			# Store the current cursor position for later
 			cur_pos = editor.getCursorScreenPosition()

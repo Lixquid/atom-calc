@@ -1,3 +1,8 @@
+## 0.3.4
+- Forced `calc:evaluate` and `calc:replace` to skip empty selections
+- Fixed name mismatch bug relating to `calc:count` command
+- Removed default keymap
+
 ## 0.3.3
 - Fixed multi-selection calculations not being one-step undo
 

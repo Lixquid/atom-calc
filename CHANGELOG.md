@@ -1,3 +1,6 @@
+## 0.3.3
+- Fixed multi-selection calculations not being one-step undo
+
 ## 0.3.2
 - Fixed error on selection based evaluation with returning cursor position
 

@@ -1,5 +1,9 @@
-{CompositeDisposable} = require "atom"
+## Dependencies ################################################################
+
+{ CompositeDisposable } = require "atom"
 vm = require "vm"
+
+## Package #####################################################################
 
 module.exports = Calc =
 
@@ -26,106 +30,117 @@ module.exports = Calc =
 			default: 0
 			description: "The starting number to count from when using `count`."
 
-	## Events ##################################################################
+	## Fields ##################################################################
 
 	events: null
 	sandbox: null
+
+	## Activator / Deactivator #################################################
 
 	activate: ->
 		# Register Command event handlers
 		@events = new CompositeDisposable
 		@events.add( atom.commands.add( "atom-text-editor", {
-			"calc:evaluate": => @evaluateCommand()
-			"calc:replace": => @replaceCommand()
-			"calc:count": => @countCommand()
+			"calc:replace": => @editorReplace()
+			"calc:evaluate": => @editorEvaluate()
+			"calc:count": => @editorCount()
 		} ) )
 
-		# Create Sandbox and populate with functions
+		# Create Sandbox
 		@sandbox = vm.createContext()
-		vm.runInContext "Math.pwd = function( len ) {
-				out = \"\";
-				for ( var x = 0; x < ( len || 20 ); x++ )
-					out += String.fromCharCode(
-					  Math.floor( Math.random() * 95 + 32 ) );
-				return out;
-			};
-			Math.password = Math.pwd;", @sandbox
+		vm.runInContext(
+			"""
+				Math.pwd = function( len ) {
+					var out = "";
+					for ( var x = 0; x < ( len || 20 ); x++ ) {
+						out += String.fromCharCode( Math.random() * 95 + 32 );
+					}
+					return out;
+				}
+				Math.password = Math.pwd;
+			""",
+			@sandbox
+		)
 
 	deactivate: ->
 		@events.dispose()
 
-
-
-	## Util Functions ##########################################################
+	## Util ####################################################################
 
 	previous: null
 	count: null
 
-	calculateResult: (str) ->
-		# extendedVariables
-		if atom.config.get "calc.extendedVariables"
-			str = "
+	calculateResult: ( expression ) ->
+		# `extendedVariables`
+		if atom.config.get( "calc.extendedVariables" )
+			expression = "
 				_ = #{@previous};
 				_#{@count} = _;
 				i = #{@count++};
-				#{str}"
+			" + expression
 
-		# withMath
-		if atom.config.get "calc.withMath"
-			str = "with (Math) {#{str}}"
+		# `withMath`
+		if atom.config.get( "calc.withMath" )
+			expression = "with ( Math ) {" + expression + "}"
 
-		try @previous = vm.runInContext( str, @sandbox )
+		try
+			@previous = vm.runInContext( expression, @sandbox )
 
-	iterateSelections: (editor, fn, ignore_empty) ->
-		# Reset Count
-		@count = atom.config.get "calc.countStartIndex"
+	iterateSelections: ( func, include_empty ) ->
+		# Get the current editor
+		editor = atom.workspace.getActiveTextEditor()
+		if not editor?
+			return
 
-		# If selection's empty, select all and split
+		# Reset the expression count
+		@count = atom.config.get( "calc.countStartIndex" )
+
+		# If the selection's empty and we have splitOnEmpty set to true,
+		# select all and split into selections
 		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and
 		  editor.getSelections().length == 1 and
 		  editor.getSelections()[0].getText() == ""
 
+			# Store the current cursor position for later
 			cur_pos = editor.getCursorScreenPosition()
 			editor.selectAll()
 			editor.splitSelectionsIntoLines()
 
-		# Iterate over selections, replace with result
+		# Iterate over selections, replace with result of `func`
 		editor.getBuffer().transact ->
-			for sel in editor.getSelections().sort( (a, b) -> a.compare( b ) )
-				if sel.isEmpty() and not ignore_empty
+			for sel in editor.getSelections().sort( ( a, b ) -> a.compare( b ) )
+				# If we're ignoring empty selections, skip
+				if sel.isEmpty() and not include_empty
 					continue
-				out = fn( sel )
-				sel.insertText( out.toString() ) if out?
 
+				out = func( sel )
+				if out?
+					sel.insertText( out.toString() )
+
+		# Set cursor back to where it was if we moved it
 		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and cur_pos?
-			editor.setCursorScreenPosition cur_pos
-
-
+			editor.setCursorScreenPosition( cur_pos )
 
 	## Commands ################################################################
 
-	evaluateCommand: ->
-		editor = atom.workspace.getActiveTextEditor()
-		return unless editor?
+	editorEvaluate: ->
+		@iterateSelections( ( sel ) =>
+			result = @calculateResult( sel.getText() )
+			if not result?
+				return
 
-		@iterateSelections( editor, (sel) =>
-			out = @calculateResult sel.getText()
-			return unless out?
+			return sel.getText() + " = " + result
+		)
 
-			sel.getText() + " = " + out )
+	editorReplace: ->
+		@iterateSelections( ( sel ) =>
+			result = @calculateResult( sel.getText() )
+			if not result?
+				return
 
-	replaceCommand: ->
-		editor = atom.workspace.getActiveTextEditor()
-		return unless editor?
+			return result
+		)
 
-		@iterateSelections( editor, (sel) =>
-			out = @calculateResult sel.getText()
-
-			return out )
-
-	countCommand: ->
-		editor = atom.workspace.getActiveTextEditor()
-		return unless editor?
-
-		i = atom.config.get "calc.countStartIndex"
-		@iterateSelections( editor, ( (sel) => i++ ), true )
+	editorCount: ->
+		i = atom.config.get( "calc.countStartIndex" )
+		@iterateSelections( ( ( sel ) => i++ ), true )

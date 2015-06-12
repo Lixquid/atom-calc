@@ -1,3 +1,6 @@
+## 0.3.6
+- Added activation commands
+
 ## 0.3.5
 - Added single-line comments to lines to ignore
 

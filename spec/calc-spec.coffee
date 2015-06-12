@@ -1,27 +1,24 @@
-fs = require "fs-plus"
-path = require "path"
-temp = require "temp"
-
 describe "calc", ->
 
+	activatePromise = null
 	editor = null
 	editor_view = null
 
+	exec = ( command, callback ) ->
+		atom.commands.dispatch( editor_view, command )
+		waitsForPromise ->
+			return activatePromise
+		runs( callback )
+
 	beforeEach ->
-		dir = temp.mkdirSync()
-		atom.project.setPaths( [ dir ] )
-
-		file_path = path.join( dir, "calc.txt" )
-		fs.writeFileSync( file_path, "" )
-
 		waitsForPromise ->
-			atom.workspace.open( file_path ).then( ( o ) ->
-				editor = o
-				editor_view = atom.views.getView( editor )
-			)
+			atom.workspace.open()
 
-		waitsForPromise ->
-			atom.packages.activatePackage( "calc" )
+		runs ->
+			editor = atom.workspace.getActiveTextEditor()
+			editor_view = atom.views.getView( editor )
+
+			activatePromise = atom.packages.activatePackage( "calc" )
 
 		atom.config.set( "calc.evaluateAllOnEmptySelection", true )
 
@@ -35,21 +32,22 @@ describe "calc", ->
 			editor.setCursorBufferPosition [ 0, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-			expect( editor.getText() ).toBe( """
-				1 + 2 = 3
-				2 + 3
-			""" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe( """
+					1 + 2 = 3
+					2 + 3
+				""" )
+			)
 
 		it "evaluates expressions selected in-line", ->
 			editor.setText( "TEST1 + 2TEXT" )
 			editor.setCursorBufferPosition [ 0, 4 ]
 			editor.selectRight( 5 )
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe( "TEST1 + 2 = 3TEXT" )
+			)
 
-			expect( editor.getText() ).toBe( "TEST1 + 2 = 3TEXT" )
 
 		it "evaluates expressions in multiple selections", ->
 			editor.setText( """
@@ -60,20 +58,20 @@ describe "calc", ->
 			editor.addCursorAtBufferPosition [ 1, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-			expect( editor.getText() ).toBe ( """
-				1 + 2 = 3
-				2 + 3 = 5
-			""" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe ( """
+					1 + 2 = 3
+					2 + 3 = 5
+				""" )
+			)
 
 		it "can access javascript functions", ->
 			editor.setText( "Math.pow( 3, 2 )" )
 			editor.selectAll()
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-			expect( editor.getText() ).toBe( "Math.pow( 3, 2 ) = 9" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe( "Math.pow( 3, 2 ) = 9" )
+			)
 
 	describe "when the 'calc:replace' command is run", ->
 
@@ -85,12 +83,12 @@ describe "calc", ->
 			editor.setCursorBufferPosition [ 0, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:replace" )
-
-			expect( editor.getText() ).toBe( """
-				3
-				2 + 3
-			""" )
+			exec( "calc:replace", ->
+				expect( editor.getText() ).toBe( """
+					3
+					2 + 3
+				""" )
+			)
 
 		it "replaces expressions in multiple selections", ->
 			editor.setText( """
@@ -101,12 +99,12 @@ describe "calc", ->
 			editor.addCursorAtBufferPosition [ 1, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:replace" )
-
-			expect( editor.getText() ).toBe ( """
-				3
-				5
-			""" )
+			exec( "calc:replace", ->
+				expect( editor.getText() ).toBe ( """
+					3
+					5
+				""" )
+			)
 
 		it "ignores empty selections", ->
 			editor.setText( """
@@ -119,13 +117,13 @@ describe "calc", ->
 			editor.addCursorAtBufferPosition [ 2, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:replace" )
+			exec( "calc:replace", ->
+				expect( editor.getText() ).toBe ( """
+					3
 
-			expect( editor.getText() ).toBe ( """
-				3
-
-				5
-			""" )
+					5
+				""" )
+			)
 
 	describe "when the 'calc:evaluate' command is run", ->
 
@@ -137,12 +135,12 @@ describe "calc", ->
 			editor.setCursorBufferPosition [ 0, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-			expect( editor.getText() ).toBe( """
-				1 + 2 = 3
-				2 + 3
-			""" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe( """
+					1 + 2 = 3
+					2 + 3
+				""" )
+			)
 
 		it "replaces expressions in multiple selections", ->
 			editor.setText( """
@@ -153,12 +151,12 @@ describe "calc", ->
 			editor.addCursorAtBufferPosition [ 1, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-			expect( editor.getText() ).toBe ( """
-				1 + 2 = 3
-				2 + 3 = 5
-			""" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe ( """
+					1 + 2 = 3
+					2 + 3 = 5
+				""" )
+			)
 
 		it "ignores empty selections", ->
 			editor.setText( """
@@ -171,13 +169,13 @@ describe "calc", ->
 			editor.addCursorAtBufferPosition [ 2, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:evaluate" )
+			exec( "calc:evaluate", ->
+				expect( editor.getText() ).toBe ( """
+					1 + 2 = 3
 
-			expect( editor.getText() ).toBe ( """
-				1 + 2 = 3
-
-				2 + 3 = 5
-			""" )
+					2 + 3 = 5
+				""" )
+			)
 
 	describe "when the 'calc:count' command is run", ->
 
@@ -190,14 +188,14 @@ describe "calc", ->
 			for i in [1..3]
 				editor.addCursorAtBufferPosition [ i, 0 ]
 
-			atom.commands.dispatch( editor_view, "calc:count" )
-
-			expect( editor.getText() ).toBe( """
-				0
-				1
-				2
-				3
-			""" )
+			exec( "calc:count", ->
+				expect( editor.getText() ).toBe( """
+					0
+					1
+					2
+					3
+				""" )
+			)
 
 		it "does not ignore empty selections", ->
 			editor.setText( """
@@ -210,13 +208,13 @@ describe "calc", ->
 			editor.addCursorAtBufferPosition [ 2, 0 ]
 			editor.selectToEndOfLine()
 
-			atom.commands.dispatch( editor_view, "calc:count" )
-
-			expect( editor.getText() ).toBe ( """
-				0
-				1
-				2
-			""" )
+			exec( "calc:count", ->
+				expect( editor.getText() ).toBe ( """
+					0
+					1
+					2
+				""" )
+			)
 
 	describe "'calc.evaluateAllOnEmptySelection'", ->
 
@@ -232,13 +230,13 @@ describe "calc", ->
 					3 + 4
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					1 + 2 = 3
-					2 + 3 = 5
-					3 + 4 = 7
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						1 + 2 = 3
+						2 + 3 = 5
+						3 + 4 = 7
+					""" )
+				)
 
 			it "still only evaluates inside a selection if one is present", ->
 				editor.setText( """
@@ -249,13 +247,13 @@ describe "calc", ->
 				editor.setCursorBufferPosition [ 0, 0 ]
 				editor.selectToEndOfLine()
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					1 + 2 = 3
-					2 + 3
-					3 + 4
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						1 + 2 = 3
+						2 + 3
+						3 + 4
+					""" )
+				)
 
 		describe "when false", ->
 
@@ -269,13 +267,13 @@ describe "calc", ->
 					3 + 4
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					1 + 2
-					2 + 3
-					3 + 4
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						1 + 2
+						2 + 3
+						3 + 4
+					""" )
+				)
 
 			it "still evaluates inside a selection if one is present", ->
 				editor.setText( """
@@ -286,13 +284,13 @@ describe "calc", ->
 				editor.setCursorBufferPosition [ 0, 0 ]
 				editor.selectToEndOfLine()
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					1 + 2 = 3
-					2 + 3
-					3 + 4
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						1 + 2 = 3
+						2 + 3
+						3 + 4
+					""" )
+				)
 
 	describe "'calc.extendedVariables'", ->
 
@@ -308,13 +306,13 @@ describe "calc", ->
 					_ + 3
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					2 + 4 = 6
-					_ + 2 = 8
-					_ + 3 = 11
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						2 + 4 = 6
+						_ + 2 = 8
+						_ + 3 = 11
+					""" )
+				)
 
 			it "makes '_n' contain the result of the `_n`th expression", ->
 				editor.setText( """
@@ -324,14 +322,14 @@ describe "calc", ->
 					_1 + _3
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					1 + 2 = 3
-					2 + 3 = 5
-					_1 + _2 = 8
-					_1 + _3 = 11
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						1 + 2 = 3
+						2 + 3 = 5
+						_1 + _2 = 8
+						_1 + _3 = 11
+					""" )
+				)
 
 			it "makes 'i' contain the id number of the expression being evaluated", ->
 				atom.config.set( "calc.countStartIndex", 0 )
@@ -342,14 +340,14 @@ describe "calc", ->
 					i * i
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					i * i = 0
-					i * i = 1
-					i * i = 4
-					i * i = 9
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						i * i = 0
+						i * i = 1
+						i * i = 4
+						i * i = 9
+					""" )
+				)
 
 		describe "when false", ->
 
@@ -363,13 +361,13 @@ describe "calc", ->
 					typeof i
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					typeof _ = undefined
-					typeof _1 = undefined
-					typeof i = undefined
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						typeof _ = undefined
+						typeof _1 = undefined
+						typeof i = undefined
+					""" )
+				)
 
 	describe "'calc.withMath'", ->
 
@@ -386,14 +384,14 @@ describe "calc", ->
 					floor( 0.5 )
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					pow( 2, 2 ) = 4
-					pow( 3, 2 ) = 9
-					max( 1, 4, 2 ) = 4
-					floor( 0.5 ) = 0
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						pow( 2, 2 ) = 4
+						pow( 3, 2 ) = 9
+						max( 1, 4, 2 ) = 4
+						floor( 0.5 ) = 0
+					""" )
+				)
 
 			it "still allows access to Math functions via the 'Math' object", ->
 				editor.setText( """
@@ -403,14 +401,14 @@ describe "calc", ->
 					Math.floor( 0.5 )
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					Math.pow( 2, 2 ) = 4
-					Math.pow( 3, 2 ) = 9
-					Math.max( 1, 4, 2 ) = 4
-					Math.floor( 0.5 ) = 0
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						Math.pow( 2, 2 ) = 4
+						Math.pow( 3, 2 ) = 9
+						Math.max( 1, 4, 2 ) = 4
+						Math.floor( 0.5 ) = 0
+					""" )
+				)
 
 		describe "when false", ->
 
@@ -423,12 +421,12 @@ describe "calc", ->
 					typeof max
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					typeof pow = undefined
-					typeof max = undefined
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						typeof pow = undefined
+						typeof max = undefined
+					""" )
+				)
 
 			it "still allows access to Math functions via the 'Math' object", ->
 				editor.setText( """
@@ -438,14 +436,14 @@ describe "calc", ->
 					Math.floor( 0.5 )
 				""" )
 
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-
-				expect( editor.getText() ).toBe( """
-					Math.pow( 2, 2 ) = 4
-					Math.pow( 3, 2 ) = 9
-					Math.max( 1, 4, 2 ) = 4
-					Math.floor( 0.5 ) = 0
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						Math.pow( 2, 2 ) = 4
+						Math.pow( 3, 2 ) = 9
+						Math.max( 1, 4, 2 ) = 4
+						Math.floor( 0.5 ) = 0
+					""" )
+				)
 
 	describe "'calc.countStartIndex'", ->
 
@@ -454,16 +452,18 @@ describe "calc", ->
 			it "starts the expression count at 0", ->
 				atom.config.set( "calc.countStartIndex", 0 )
 				editor.setText( "\n\n" )
-				atom.commands.dispatch( editor_view, "calc:count" )
-				expect( editor.getText() ).toBe( "0\n1\n" )
+				exec( "calc:count", ->
+					expect( editor.getText() ).toBe( "0\n1\n" )
+				)
 
 		describe "when 1", ->
 
 			it "starts the expression count at 1", ->
 				atom.config.set( "calc.countStartIndex", 1 )
 				editor.setText( "\n\n" )
-				atom.commands.dispatch( editor_view, "calc:count" )
-				expect( editor.getText() ).toBe( "1\n2\n" )
+				exec( "calc:count", ->
+					expect( editor.getText() ).toBe( "1\n2\n" )
+				)
 
 	describe "'Math.pwd'", ->
 
@@ -475,16 +475,18 @@ describe "calc", ->
 					Math.pwd( 20 ).length
 					Math.pwd( 50 ).length
 				""" )
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-				expect( editor.getText() ).toBe( """
-					Math.pwd( 10 ).length = 10
-					Math.pwd( 20 ).length = 20
-					Math.pwd( 50 ).length = 50
-				""" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						Math.pwd( 10 ).length = 10
+						Math.pwd( 20 ).length = 20
+						Math.pwd( 50 ).length = 50
+					""" )
+				)
 
 		describe "when given no arguments", ->
 
 			it "generates a password of length 20", ->
 				editor.setText( "Math.pwd().length" )
-				atom.commands.dispatch( editor_view, "calc:evaluate" )
-				expect( editor.getText() ).toBe( "Math.pwd().length = 20" )
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( "Math.pwd().length = 20" )
+				)

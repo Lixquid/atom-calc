@@ -95,19 +95,21 @@ module.exports = Calc =
 		# Reset the expression count
 		@count = atom.config.get( "calc.countStartIndex" )
 
-		# If the selection's empty and we have splitOnEmpty set to true,
-		# select all and split into selections
-		if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and
-		  editor.getSelections().length == 1 and
-		  editor.getSelections()[0].isEmpty()
-
-			# Store the current cursor position for later
-			cur_pos = editor.getCursorScreenPosition()
-			editor.selectAll()
-			editor.splitSelectionsIntoLines()
+		cur_pos = null
 
 		# Iterate over selections, replace with result of `func`
 		editor.getBuffer().transact ->
+			# If the selection's empty and we have splitOnEmpty set to true,
+			# select all and split into selections
+			if atom.config.get( "calc.evaluateAllOnEmptySelection" ) and
+			  editor.getSelections().length == 1 and
+			  editor.getSelections()[0].isEmpty()
+
+				# Store the current cursor position for later
+				cur_pos = editor.getCursorScreenPosition()
+				editor.selectAll()
+				editor.splitSelectionsIntoLines()
+
 			for sel in editor.getSelections().sort( ( a, b ) -> a.compare( b ) )
 				# If we're ignoring empty selections, skip
 				if not include_empty and

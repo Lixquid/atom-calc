@@ -1,3 +1,6 @@
+## 0.3.7
+- Fixed selecting the first expression on no-selection evaluation / replace
+
 ## 0.3.6
 - Added activation commands
 

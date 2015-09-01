@@ -410,6 +410,17 @@ describe "calc", ->
 					""" )
 				)
 
+			it "does not error with expressions containing comments", ->
+				editor.setText( """
+					1 + 2 // Math
+				""" )
+
+				exec( "calc:evaluate", ->
+					expect( editor.getText() ).toBe( """
+						1 + 2 // Math = 3
+					""" )
+				)
+
 		describe "when false", ->
 
 			beforeEach ->

@@ -81,7 +81,11 @@ module.exports = Calc =
 
 		# `withMath`
 		if atom.config.get( "calc.withMath" )
-			expression = "with ( Math ) {" + expression + "}"
+			expression = """
+				with ( Math ) {
+					#{expression}
+				}
+			"""
 
 		try
 			@previous = vm.runInContext( expression, @sandbox )

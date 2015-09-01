@@ -1,3 +1,6 @@
+## 0.3.8
+- Fixed `withMath` breaking on expressions that contain comments
+
 ## 0.3.7
 - Fixed selecting the first expression on no-selection evaluation / replace
 

@@ -71,6 +71,10 @@ module.exports = Calc =
 	count: null
 
 	calculateResult: ( expression ) ->
+
+		# Sanitise expression
+		expression = expression.replace(/[×x]/g,"*").replace(/÷/g,"/")
+
 		# `extendedVariables`
 		if atom.config.get( "calc.extendedVariables" )
 			expression = "

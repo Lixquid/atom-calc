@@ -1,3 +1,6 @@
+# 0.4.0
+- Added Expression Sanitization
+
 ## 0.3.8
 - Fixed `withMath` breaking on expressions that contain comments
 

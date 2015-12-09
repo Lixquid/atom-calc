@@ -149,7 +149,7 @@ module.exports = Calc =
 			if not result?
 				return
 
-			return result
+			return result.toFixed(4)
 		)
 
 	editorCount: ->

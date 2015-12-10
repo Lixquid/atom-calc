@@ -148,8 +148,9 @@ module.exports = Calc =
 			result = @calculateResult( sel.getText() )
 			if not result?
 				return
-
-			return result.toFixed(4)
+			if parseInt(result) == parseInt(parseInt(result), 10)
+				result = parseFloat(result.toFixed(4))
+			return result
 		)
 
 	editorCount: ->

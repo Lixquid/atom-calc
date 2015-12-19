@@ -75,10 +75,8 @@ module.exports = Calc =
 		# `extendedVariables`
 		if atom.config.get( "calc.extendedVariables" )
 			expression = "
-				_ = #{@previous};
-				_#{@count} = _;
-				i = #{@count++};
-			" + expression
+				i = #{@count};
+				_#{++@count} = _ = " + expression
 
 		# `withMath`
 		if atom.config.get( "calc.withMath" )

@@ -90,6 +90,8 @@ module.exports = Calc =
 
 		try
 			@previous = vm.runInContext( expression, @sandbox )
+		catch ex
+			console.error expression, ex
 
 	iterateSelections: ( func, include_empty ) ->
 		# Get the current editor

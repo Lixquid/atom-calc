@@ -91,7 +91,9 @@ module.exports = Calc =
 		catch ex
 			console.error expression, ex
 
-	iterateSelections: ( func, include_empty ) ->
+	iterateSelections: ( func, options = {} ) ->
+		{ include_empty } = options
+
 		# Get the current editor
 		editor = atom.workspace.getActiveTextEditor()
 		if not editor?
@@ -151,4 +153,4 @@ module.exports = Calc =
 
 	editorCount: ->
 		i = atom.config.get( "calc.countStartIndex" )
-		@iterateSelections( ( ( sel ) => i++ ), true )
+		@iterateSelections( ( ( sel ) => i++ ), include_empty: true )

@@ -147,7 +147,8 @@ module.exports = Calc =
 			result = @calculateResult( sel.getText() )
 			if not result?
 				return
-
+			if parseInt(result) == parseInt(parseInt(result), 10)
+				result = parseFloat(result.toFixed(4))
 			return result
 		)
 
